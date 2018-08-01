@@ -4,5 +4,8 @@ https://stackoverflow.com/questions/45068568/is-it-possible-to-create-a-new-gym-
 
 Installation with pip install -e .
 
+If an agent uses the environment it shoult import gym_point.
+
 Envs:
 PointEnv-v0
+PointGoalEnv-v0

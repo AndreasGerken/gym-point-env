@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import gym
 from gym import error, spaces, utils, logger
 from gym.utils import seeding
@@ -6,9 +8,10 @@ import numpy as np
 
 
 class PointSimpleEnv(gym.Env):
-    metadata = {'render.modes': ['human'],
-            'video.frames_per_second' : 50
-            }
+    metadata = {
+        'render.modes': ['human', 'rgb_array'],
+        'video.frames_per_second': 50
+    }
 
     def __init__(self):
         self.dimensions = 2
@@ -33,10 +36,11 @@ class PointSimpleEnv(gym.Env):
         if self.dimensions <= 0:
             logger.error('The dimensions have to be at least 1')
         elif self.dimensions > 2:
-            logger.warn('The dimensions are bigger than 2, only the first 2 dimensions are visualized')
+            logger.warn(
+                'The dimensions are bigger than 2, only the first 2 dimensions are visualized')
 
         self.seed()
-        #self.reset()
+        # self.reset()
 
     def seed(self, given_seed=None):
         self.np_random, seed = seeding.np_random(given_seed)

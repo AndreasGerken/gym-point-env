@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import gym
 from gym import error, spaces, utils, logger
 from gym.utils import seeding
@@ -5,7 +7,10 @@ from gym.utils import seeding
 import numpy as np
 
 class PointGoalEnv(gym.GoalEnv):
-    metadata = {'render.modes': ['human']}
+    metadata = {
+        'render.modes': ['human', 'rgb_array'],
+        'video.frames_per_second' : 50
+    }
 
     def __init__(self):
         self.dimensions = 2
@@ -99,10 +104,10 @@ class PointGoalEnv(gym.GoalEnv):
             point = self.state['position']
             goal = self.goal['position']
 
-        print 'point'
-        print point
-        print 'goal'
-        print goal
+        # print 'point'
+        # print point
+        # print 'goal'
+        # print goal
 
         self.pointtrans.set_translation(
             (point[0] - self.min_position) * scale, (point[1] - self.min_position) * scale)
