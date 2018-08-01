@@ -6,14 +6,23 @@ from gym.utils import seeding
 
 import numpy as np
 
+
 class PointGoalEnv(gym.GoalEnv):
     metadata = {
         'render.modes': ['human', 'rgb_array'],
-        'video.frames_per_second' : 50
+        'video.frames_per_second': 50
     }
 
     def __init__(self):
+        super(PointGoalEnv, self).__init__()
+
         self.dimensions = 2
+
+        if self.dimensions <= 0:
+            logger.error('The dimensions have to be at least 1')
+        elif self.dimensions > 2:
+            logger.warn(
+                'The dimensions are bigger than 2, only the first 2 dimensions are visualized')
 
         self.min_action = -1.0
         self.max_action = 1.0
@@ -27,21 +36,20 @@ class PointGoalEnv(gym.GoalEnv):
 
         self.viewer = None
 
-        self.goal_space = spaces.Dict({'position':spaces.Box(
-            low=self.min_position, high=self.max_position, shape=(self.dimensions,), dtype=np.float32)
-            })
+        self.state_space = spaces.Box(low=self.min_position, high=self.max_position, shape=(
+            self.dimensions,), dtype=np.float32)
+        self.goal_space = spaces.Box(low=self.min_position, high=self.max_position, shape=(
+            self.dimensions,), dtype=np.float32)
         self.action_space = spaces.Box(
             low=self.min_action, high=self.max_action, shape=(self.dimensions,), dtype=np.float32)
-        self.observation_space = spaces.Dict({'position':spaces.Box(
-            low=self.min_position, high=self.max_position, shape=(self.dimensions,), dtype=np.float32)
-            })
-        if self.dimensions <= 0:
-            logger.error('The dimensions have to be at least 1')
-        elif self.dimensions > 2:
-            logger.warn('The dimensions are bigger than 2, only the first 2 dimensions are visualized')
+
+        self.observation_space = spaces.Dict(dict(
+            desired_goal=self.goal_space,
+            achieved_goal=self.goal_space,
+            observation=self.state_space
+        ))
 
         self.seed()
-        self.reset()
 
     def seed(self, given_seed=None):
         self.np_random, seed = seeding.np_random(given_seed)
@@ -52,25 +60,28 @@ class PointGoalEnv(gym.GoalEnv):
 
     def compute_reward(self, achieved_goal, desired_goal, info):
 
-        distance = np.linalg.norm(achieved_goal['position'] - desired_goal['position'])
+        distance = np.linalg.norm(
+            achieved_goal - desired_goal, axis=-1)
 
         done = distance < self.goal_margin
         reward = done * 1.0
 
-        return reward, done
+        return reward
 
     def step(self, action):
-        self.state['position'] += action * self.max_speed
-        self.state['position'] = np.clip(self.state['position'], self.min_position, self.max_position)
+        self.state += action * self.max_speed
+        self.state = np.clip(
+            self.state, self.min_position, self.max_position)
 
-        reward, done = self.compute_reward(self.state, self.goal, {})
+        reward = self.compute_reward(self.state, self.goal, {})
+        done = True if reward == 1.0 else False
 
-        return self.state, reward, done, {}
+        return {'observation': self.state, 'achieved_goal': self.state, 'desired_goal': self.goal}, reward, done, {}
 
     def reset(self):
-        self.state = self.observation_space.sample()
+        self.state = self.state_space.sample()
         self.goal = self.goal_space.sample()
-        return self.state
+        return dict(observation=self.state, achieved_goal=self.state, desired_goal=self.goal)
 
     def render(self, mode='human', close=False):
         screen_width = 400
@@ -98,11 +109,11 @@ class PointGoalEnv(gym.GoalEnv):
 
         if self.dimensions == 1:
             # If the environment is only one dimensional, add a dimension which is 0 for rendering
-            point = [self.state['position'][0], 0]
-            goal = [self.goal['position'][0], 0]
+            point = [self.state[0], 0]
+            goal = [self.goal[0], 0]
         else:
-            point = self.state['position']
-            goal = self.goal['position']
+            point = self.state
+            goal = self.goal
 
         # print 'point'
         # print point

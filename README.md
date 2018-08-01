@@ -26,5 +26,20 @@ pytest
 If an agent uses the environment it should `import gym_point`. The package is compatible to python3.
 
 The following environments are available:
-- PointEnv-v0
-- PointGoalEnv-v0
+### PointEnv-v0
+
+The point environment has the standard 2 dimensional state and action space. The action is a move command to the state. The goal is a two dimensional circle with a position and a fixed margin. The goal position is set randomly with the initialization.
+
+
+The environment is compatible with ddpg. Convergence is not jet proven.
+```
+ python3 -m baselines.ddpg.main --env-id PointEnv-v0
+ ```
+
+### PointGoalEnv-v0
+This environment is an environment with variable goals. It implements gym.GoalEnv with all the required functions.
+
+The environment is compatible with her. Convergence is not jet proven.
+```
+python3 -m baselines.her.experiment.train --env PointGoalEnv-v0
+```
