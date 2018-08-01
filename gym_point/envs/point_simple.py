@@ -14,13 +14,16 @@ class PointSimpleEnv(gym.Env):
     }
 
     def __init__(self):
+
+        super(PointSimpleEnv, self).__init__()
+
         self.dimensions = 2
 
         self.min_action = -1.0
         self.max_action = 1.0
         self.min_position = -1.0
         self.max_position = 1.0
-        self.max_speed = 0.07
+        self.max_speed = 0.05
 
         # Fixed goal to 0.5 in all dimensions. For variable goal use PointGoalEnv.
         self.goal_position = np.array([0.5] * self.dimensions)
