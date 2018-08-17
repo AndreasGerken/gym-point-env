@@ -41,5 +41,5 @@ This environment is an environment with variable goals. It implements gym.GoalEn
 
 The environment is compatible with [HER](https://github.com/openai/baselines/tree/master/baselines/her). Convergence is not jet proven.
 ```
-python3 -m baselines.her.experiment.train --env PointGoalEnv-v0
+python3 -m baselines.her.experiment.train --env PointGoalEnv-v0 --num_cpu 3
 ```

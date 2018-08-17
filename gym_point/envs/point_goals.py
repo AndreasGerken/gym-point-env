@@ -28,9 +28,10 @@ class PointGoalEnv(gym.GoalEnv):
         self.max_action = 1.0
         self.min_position = -1.0
         self.max_position = 1.0
-        self.max_speed = 0.07
+        self.max_speed = 0.05
 
-        # Fixed goal to 0.5 in all dimensions. For variable goal use PointGoalEnv.
+        # The goal can either be fixed or set randomly with every reset
+        self.set_goal_randomly = False
         self.goal = None
         self.goal_margin = 0.1
 
@@ -76,11 +77,15 @@ class PointGoalEnv(gym.GoalEnv):
         reward = self.compute_reward(self.state, self.goal, {})
         done = True if reward == 1.0 else False
 
-        return {'observation': self.state, 'achieved_goal': self.state, 'desired_goal': self.goal}, reward, done, {}
+        return {'observation': self.state, 'achieved_goal': self.state, 'desired_goal': self.goal}, reward, done, dict(is_success=done)
 
     def reset(self):
         self.state = self.state_space.sample()
-        self.goal = self.goal_space.sample()
+
+        if self.set_goal_randomly:
+            self.goal = self.goal_space.sample()
+        else:
+            self.goal = np.zeros(self.dimensions)
         return dict(observation=self.state, achieved_goal=self.state, desired_goal=self.goal)
 
     def render(self, mode='human', close=False):

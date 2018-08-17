@@ -26,7 +26,7 @@ class PointSimpleEnv(gym.Env):
         self.max_speed = 0.05
 
         # Fixed goal to 0.5 in all dimensions. For variable goal use PointGoalEnv.
-        self.goal_position = np.array([0.5] * self.dimensions)
+        self.goal_position = np.array([0.] * self.dimensions)
         self.goal_margin = 0.1
 
         self.viewer = None
