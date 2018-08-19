@@ -1,10 +1,11 @@
 #!/usr/bin/python
 
+
 import gym
 from gym import error, spaces, utils, logger
 from gym.utils import seeding
 
-import numpy as np
+import numpy
 
 
 class PointGoalEnv(gym.GoalEnv):
@@ -38,11 +39,11 @@ class PointGoalEnv(gym.GoalEnv):
         self.viewer = None
 
         self.state_space = spaces.Box(low=self.min_position, high=self.max_position, shape=(
-            self.dimensions,), dtype=np.float32)
+            self.dimensions,), dtype=numpy.float32)
         self.goal_space = spaces.Box(low=self.min_position, high=self.max_position, shape=(
-            self.dimensions,), dtype=np.float32)
+            self.dimensions,), dtype=numpy.float32)
         self.action_space = spaces.Box(
-            low=self.min_action, high=self.max_action, shape=(self.dimensions,), dtype=np.float32)
+            low=self.min_action, high=self.max_action, shape=(self.dimensions,), dtype=numpy.float32)
 
         self.observation_space = spaces.Dict(dict(
             desired_goal=self.goal_space,
@@ -61,7 +62,7 @@ class PointGoalEnv(gym.GoalEnv):
 
     def compute_reward(self, achieved_goal, desired_goal, info):
 
-        distance = np.linalg.norm(
+        distance = numpy.linalg.norm(
             achieved_goal - desired_goal, axis=-1)
 
         done = distance < self.goal_margin
@@ -71,7 +72,7 @@ class PointGoalEnv(gym.GoalEnv):
 
     def step(self, action):
         self.state += action * self.max_speed
-        self.state = np.clip(
+        self.state = numpy.clip(
             self.state, self.min_position, self.max_position)
 
         reward = self.compute_reward(self.state, self.goal, {})
@@ -85,7 +86,7 @@ class PointGoalEnv(gym.GoalEnv):
         if self.set_goal_randomly:
             self.goal = self.goal_space.sample()
         else:
-            self.goal = np.zeros(self.dimensions)
+            self.goal = numpy.zeros(self.dimensions)
         return dict(observation=self.state, achieved_goal=self.state, desired_goal=self.goal)
 
     def render(self, mode='human', close=False):
@@ -113,7 +114,8 @@ class PointGoalEnv(gym.GoalEnv):
             self.viewer.add_geom(goal)
 
         if self.dimensions == 1:
-            # If the environment is only one dimensional, add a dimension which is 0 for rendering
+            # If the environment is only one dimensional, add a dimension which
+            # is 0 for rendering
             point = [self.state[0], 0]
             goal = [self.goal[0], 0]
         else:

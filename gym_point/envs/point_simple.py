@@ -4,7 +4,7 @@ import gym
 from gym import error, spaces, utils, logger
 from gym.utils import seeding
 
-import numpy as np
+import numpy
 
 
 class PointSimpleEnv(gym.GoalEnv):
@@ -13,33 +13,28 @@ class PointSimpleEnv(gym.GoalEnv):
         'video.frames_per_second': 50
     }
 
-    reward_range={0,1}
-    observation_range={-1,1}
-    action_range={-1,1}
+    reward_range = {0, 1}
+    observation_range = {-1, 1}
+    action_range = {-1, 1}
     spec = None
 
     dimensions = 2
     action_space = spaces.Box(
-        low=min(action_range), high=max(action_range), shape=(dimensions,), dtype=np.float32)
+        low=min(action_range), high=max(action_range), shape=(dimensions,), dtype=numpy.float32)
     observation_space = spaces.Box(
-        low=min(observation_range), high=max(observation_range), shape=(dimensions,), dtype=np.float32)
-
+        low=min(observation_range), high=max(observation_range), shape=(dimensions,), dtype=numpy.float32)
 
     def __init__(self):
 
         super(PointSimpleEnv, self).__init__()
         self.max_speed = 0.05
-
-        # Fixed goal to 0.5 in all dimensions. For variable goal use PointGoalEnv.
-        self.goal = np.array([0.] * self.dimensions)
         self.goal_margin = 0.1
 
-        self.viewer = None
+        # Fixed goal to 0 in all dimensions. For variable goal use
+        # PointGoalEnv.
+        self.goal = numpy.array([0.] * self.dimensions)
 
-        self.action_range = self.__class__.action_range
-        self.observation_range = self.__class__.observation_range
-        self.action_space = self.__class__.action_space
-        self.observation_space = self.__class__.observation_space
+        self.viewer = None
 
         if self.dimensions <= 0:
             logger.error('The dimensions have to be at least 1')
@@ -50,29 +45,28 @@ class PointSimpleEnv(gym.GoalEnv):
         self.seed()
 
     def seed(self, given_seed=None):
-        self.np_random, seed = seeding.np_random(given_seed)
+        self.numpy_random, seed = seeding.np_random(given_seed)
 
         # TODO: The seed should be passed from seeding
         gym.spaces.np_random.seed(given_seed)
         return [seed]
 
-    def compute_reward(self, achieved_goal, desired_goal = None, info= None):
+    def compute_reward(self, achieved_goal, desired_goal=None, info=None):
         if desired_goal is None:
             desired_goal = self.goal
 
-        distance = np.linalg.norm(achieved_goal - desired_goal)
+        distance = numpy.linalg.norm(achieved_goal - desired_goal)
 
         done = distance < self.goal_margin
         reward = done * 1.0
 
         return reward, done
 
-
-
     def step(self, action):
 
         self.state += action * self.max_speed
-        self.state = np.clip(self.state, min(self.observation_range), max(self.observation_range))
+        self.state = numpy.clip(self.state, min(
+            self.observation_range), max(self.observation_range))
 
         reward, done = self.compute_reward(self.state, self.goal, {})
 
@@ -107,7 +101,8 @@ class PointSimpleEnv(gym.GoalEnv):
             self.viewer.add_geom(goal)
 
         if self.dimensions == 1:
-            # If the environment is only one dimensional, add a dimension which is 0 for rendering
+            # If the environment is only one dimensional, add a dimension which
+            # is 0 for rendering
             point = [self.state[0], 0]
             goal = [self.goal[0], 0]
         else:
