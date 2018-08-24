@@ -31,7 +31,7 @@ The following environments are available:
 The point environment has the standard 2 dimensional state and action space. The action is a move command to the state. The goal is a two dimensional circle with a position and a fixed margin. The goal position is set randomly with the initialization.
 
 
-The environment is compatible with [DDPG](https://github.com/openai/baselines/tree/master/baselines/ddpg). Convergence is not jet proven.
+The environment is compatible with [DDPG](https://github.com/openai/baselines/tree/master/baselines/ddpg). Convergence is not yet proven.
 ```
  python3 -m baselines.ddpg.main --env-id PointEnv-v0
  ```
@@ -39,7 +39,7 @@ The environment is compatible with [DDPG](https://github.com/openai/baselines/tr
 ### PointGoalEnv-v0
 This environment is an environment with variable goals. It implements gym.GoalEnv with all the required functions.
 
-The environment is compatible with [HER](https://github.com/openai/baselines/tree/master/baselines/her). Convergence is not jet proven.
+The environment is compatible with [HER](https://github.com/openai/baselines/tree/master/baselines/her). Convergence is not yet proven.
 ```
 python3 -m baselines.her.experiment.train --env PointGoalEnv-v0 --num_cpu 3
 ```
