@@ -7,7 +7,7 @@ from gym.utils import seeding
 import numpy
 
 
-class PointSimpleEnv(gym.GoalEnv):
+class PointSimpleEnv(gym.Env):
     metadata = {
         'render.modes': ['human', 'rgb_array'],
         'video.frames_per_second': 50
@@ -60,7 +60,7 @@ class PointSimpleEnv(gym.GoalEnv):
         done = distance < self.goal_margin
         reward = done * 1.0
 
-        return reward, done
+        return reward
 
     def step(self, action):
 
@@ -68,7 +68,8 @@ class PointSimpleEnv(gym.GoalEnv):
         self.state = numpy.clip(self.state, min(
             self.observation_range), max(self.observation_range))
 
-        reward, done = self.compute_reward(self.state, self.goal, {})
+        reward = self.compute_reward(self.state, self.goal, {})
+        done = True if reward >= 1.0 else False
 
         return self.state, reward, done, {}
 

@@ -2,7 +2,7 @@
 
 
 import gym
-from gym import error, spaces, utils, logger
+from gym import spaces, logger
 from gym.utils import seeding
 
 import numpy
@@ -13,6 +13,26 @@ class PointGoalEnv(gym.GoalEnv):
         'render.modes': ['human', 'rgb_array'],
         'video.frames_per_second': 50
     }
+
+    reward_range = {0, 1}
+    state_range = {-1, 1}
+    action_range = {-1, 1}
+    goal_range = {-1, 1}
+    spec = None
+
+    dimensions = 2
+    state_space = spaces.Box(
+        low=min(state_range), high=max(state_range), shape=(dimensions,), dtype=numpy.float32)
+    goal_space = spaces.Box(low=min(goal_range), high=max(goal_range), shape=(
+        dimensions,), dtype=numpy.float32)
+    action_space = spaces.Box(
+        low=min(action_range), high=max(action_range), shape=(dimensions,), dtype=numpy.float32)
+
+    observation_space = spaces.Dict(dict(
+        desired_goal=goal_space,
+        achieved_goal=goal_space,
+        observation=state_space
+    ))
 
     def __init__(self):
         super(PointGoalEnv, self).__init__()
@@ -25,10 +45,6 @@ class PointGoalEnv(gym.GoalEnv):
             logger.warn(
                 'The dimensions are bigger than 2, only the first 2 dimensions are visualized')
 
-        self.min_action = -1.0
-        self.max_action = 1.0
-        self.min_position = -1.0
-        self.max_position = 1.0
         self.max_speed = 0.05
 
         # The goal can either be fixed or set randomly with every reset
@@ -38,20 +54,8 @@ class PointGoalEnv(gym.GoalEnv):
 
         self.viewer = None
 
-        self.state_space = spaces.Box(low=self.min_position, high=self.max_position, shape=(
-            self.dimensions,), dtype=numpy.float32)
-        self.goal_space = spaces.Box(low=self.min_position, high=self.max_position, shape=(
-            self.dimensions,), dtype=numpy.float32)
-        self.action_space = spaces.Box(
-            low=self.min_action, high=self.max_action, shape=(self.dimensions,), dtype=numpy.float32)
-
-        self.observation_space = spaces.Dict(dict(
-            desired_goal=self.goal_space,
-            achieved_goal=self.goal_space,
-            observation=self.state_space
-        ))
-
         self.seed()
+        self.reset()
 
     def seed(self, given_seed=None):
         self.np_random, seed = seeding.np_random(given_seed)
@@ -60,7 +64,8 @@ class PointGoalEnv(gym.GoalEnv):
         gym.spaces.np_random.seed(given_seed)
         return [seed]
 
-    def compute_reward(self, achieved_goal, desired_goal, info):
+    def compute_reward(self, achieved_goal, desired_goal=None, info=None):
+        desired_goal = self.goal if desired_goal is None else desired_goal
 
         distance = numpy.linalg.norm(
             achieved_goal - desired_goal, axis=-1)
@@ -73,10 +78,10 @@ class PointGoalEnv(gym.GoalEnv):
     def step(self, action):
         self.state += action * self.max_speed
         self.state = numpy.clip(
-            self.state, self.min_position, self.max_position)
+            self.state, min(self.state_range), max(self.state_range))
 
         reward = self.compute_reward(self.state, self.goal, {})
-        done = True if reward == 1.0 else False
+        done = True if reward >= 1.0 else False
 
         return {'observation': self.state, 'achieved_goal': self.state, 'desired_goal': self.goal}, reward, done, dict(is_success=done)
 
@@ -87,6 +92,8 @@ class PointGoalEnv(gym.GoalEnv):
             self.goal = self.goal_space.sample()
         else:
             self.goal = numpy.zeros(self.dimensions)
+
+        # TODO: The achieved goal has to be an array of achieved goals instead of one state
         return dict(observation=self.state, achieved_goal=self.state, desired_goal=self.goal)
 
     def render(self, mode='human', close=False):
